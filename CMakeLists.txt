@@ -27,6 +27,6 @@ find_package(SDL2_ttf REQUIRED)
 target_link_libraries(game SDL2::TTF)
 
 #file(COPY img DESTINATION ${CMAKE_BINARY_DIR})
-#file(COPY ttf DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ttf DESTINATION ${CMAKE_BINARY_DIR})
 #file(COPY config DESTINATION ${CMAKE_BINARY_DIR})
 
