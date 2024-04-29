@@ -10,12 +10,12 @@ using namespace std;
 static int game_start = 0;
 
 SDL_Window *create_window() {
-  // const int w = 1280;
-  // const int h = 960;
-  const int w = 320;
-  const int h = 240;
-  //  const int w = 400;
-  //  const int h = 800;
+  const int w = 1280;
+  const int h = 960;
+  // const int w = 320;
+  // const int h = 240;
+  //   const int w = 400;
+  //   const int h = 800;
   SDL_Window *window;
   window = SDL_CreateWindow("SDL2 Window", SDL_WINDOWPOS_UNDEFINED,
                             SDL_WINDOWPOS_UNDEFINED, w, h, 0);
@@ -67,7 +67,10 @@ int main() {
   char display_text[320] = "Hello, World!";
   SDL_Event e;
   bool quit = false;
-  bool grid[240][320] = {{false}};
+
+  // bool grid[240][320] = {{false}};
+  int grid[240][320] = {{0}};
+
   long frame_count = 0;
   bool mouse_down = false;
   SDL_Rect text_rect = {0, 0, 320, 240};
@@ -75,6 +78,10 @@ int main() {
   unsigned long milliseconds;
   unsigned long seconds;
   unsigned long minutes;
+
+  char r = 0;
+  char g = 0;
+  char b = 0;
 
   milliseconds = SDL_GetTicks64() - game_start;
   seconds = milliseconds / 1000;
@@ -128,11 +135,11 @@ int main() {
     if (mouse_down) {
       int x, y;
       SDL_GetMouseState(&x, &y);
-      // x = x / 4;
-      // y = y / 4;
+      x = x / 4;
+      y = y / 4;
       for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
-          grid[y + i][x + j] = true;
+          grid[y + i][x + j] = rand() % 255;
         }
       }
     }
@@ -140,26 +147,44 @@ int main() {
     if (frame_count % 60 == 0) {
       int x = 160;
       int y = 0;
-      grid[y][x] = true;
-      grid[y][x + 1] = true;
-      grid[y + 1][x] = true;
-      grid[y + 1][x + 1] = true;
+      grid[y][x] = rand() % 255;
+      grid[y][x + 1] = rand() % 255;
+      grid[y + 1][x] = rand() % 255;
+      grid[y + 1][x + 1] = rand() % 255;
     }
 
+    // this algorithm simulates sand falling
     for (int i = 239; i > 0; i--) {
       for (int j = 0; j < 320; j++) {
+
+        // the sand falling logic is here
         if (grid[i][j]) {
           if (!grid[i + 1][j]) {
-            grid[i][j] = false;
-            grid[i + 1][j] = true;
+            grid[i + 1][j] = grid[i][j];
+            grid[i][j] = 0;
           } else if (!grid[i + 1][j + 1]) {
-            grid[i][j] = false;
-            grid[i + 1][j + 1] = true;
+            grid[i + 1][j + 1] = grid[i][j];
+            grid[i][j] = 0;
           } else if (!grid[i + 1][j - 1]) {
-            grid[i][j] = false;
-            grid[i + 1][j - 1] = true;
+            grid[i + 1][j - 1] = grid[i][j];
+            grid[i][j] = 0;
           }
+
+          // this code extends the physics to begin acting like a liquid
+          /*
+          else if (!grid[i][j + 1]) {
+            grid[i][j + 1] = grid[i][j];
+            grid[i][j] = 0;
+          } else if (!grid[i][j - 1]) {
+            grid[i][j - 1] = grid[i][j];
+            grid[i][j] = 0;
+          }
+          */
         }
+
+        // if i wanted to, i could comment out the above
+        // code and use another if-statement series to
+        // simulate water instead
       }
     }
 
@@ -187,11 +212,17 @@ int main() {
     SDL_SetRenderTarget(renderer, target_texture);
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
-    SDL_SetRenderDrawColor(renderer, 194, 178, 128, 255);
+    // SDL_SetRenderDrawColor(renderer, 194, 178, 128, 255);
 
     for (int i = 0; i < 240; i++) {
       for (int j = 0; j < 320; j++) {
         if (grid[i][j]) {
+
+          r = (grid[i][j] & 0x000000FF);
+          g = (grid[i][j] & 0x0000FF00) >> 8;
+          b = (grid[i][j] & 0x00FF0000) >> 16;
+
+          SDL_SetRenderDrawColor(renderer, r, g, b, 255);
           SDL_RenderDrawPoint(renderer, j, i);
         }
       }
