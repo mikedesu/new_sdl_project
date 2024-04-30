@@ -139,26 +139,33 @@ int main() {
       y = y / 4;
       for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
-          grid[y + i][x + j] = rand() % 255;
+          if (y + i < 240 && x + j < 320) {
+            grid[y + i][x + j] = rand() % 255;
+          }
         }
       }
     }
 
-    if (frame_count % 60 == 0) {
-      int x = 160;
-      int y = 0;
-      grid[y][x] = rand() % 255;
-      grid[y][x + 1] = rand() % 255;
-      grid[y + 1][x] = rand() % 255;
-      grid[y + 1][x + 1] = rand() % 255;
-    }
+    // if (frame_count % 60 == 0) {
+    int x = 160;
+    int y = 0;
+    // grid[y][x] = (rand() % 255) << 16;
+    grid[y][x] = 255 << 16;
+    // grid[y][x + 1] = rand() % 255 << 16;
+    grid[y][x + 1] = 255 << 16;
+    // grid[y + 1][x] = rand() % 255 << 16;
+    grid[y + 1][x] = 255 << 16;
+    // grid[y + 1][x + 1] = rand() % 255 << 16;
+    grid[y + 1][x + 1] = 255 << 16;
+    //}
 
     // this algorithm simulates sand falling
     for (int i = 239; i > 0; i--) {
-      for (int j = 0; j < 320; j++) {
+      for (int j = 1; j < 320; j++) {
 
         // the sand falling logic is here
-        if (grid[i][j]) {
+
+        if (grid[i][j] & 0x000000FF) {
           if (!grid[i + 1][j]) {
             grid[i + 1][j] = grid[i][j];
             grid[i][j] = 0;
@@ -169,9 +176,18 @@ int main() {
             grid[i + 1][j - 1] = grid[i][j];
             grid[i][j] = 0;
           }
-
+        } else if (grid[i][j] & 0x00FF0000) {
+          if (!grid[i + 1][j]) {
+            grid[i + 1][j] = grid[i][j];
+            grid[i][j] = 0;
+          } else if (!grid[i + 1][j + 1]) {
+            grid[i + 1][j + 1] = grid[i][j];
+            grid[i][j] = 0;
+          } else if (!grid[i + 1][j - 1]) {
+            grid[i + 1][j - 1] = grid[i][j];
+            grid[i][j] = 0;
+          }
           // this code extends the physics to begin acting like a liquid
-          /*
           else if (!grid[i][j + 1]) {
             grid[i][j + 1] = grid[i][j];
             grid[i][j] = 0;
@@ -179,7 +195,6 @@ int main() {
             grid[i][j - 1] = grid[i][j];
             grid[i][j] = 0;
           }
-          */
         }
 
         // if i wanted to, i could comment out the above
